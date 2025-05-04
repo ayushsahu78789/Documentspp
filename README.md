@@ -1,1 +1,735 @@
-# Documentspp
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>PDF &amp; Video Uploader with Google Login &amp; PDF Editor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #f0f0f5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #login-section, #app-section {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: saturate(180%) blur(15px);
+    border-radius: 20px;
+    box-shadow:
+      0 4px 30px rgba(0,0,0,0.1),
+      inset 0 0 0 1px rgba(255,255,255,0.3);
+    padding: 32px 28px;
+    width: 360px;
+    max-width: 90vw;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  #login-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 400px;
+  }
+
+  h1 {
+    margin: 0 0 24px 0;
+    font-weight: 700;
+    font-size: 2rem;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  #user-info {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    color: #ffd700;
+    font-weight: 700;
+  }
+
+  #user-info img {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border: 2px solid #ffd700;
+  }
+
+  #logout-btn {
+    background: #ffd700;
+    border: none;
+    color: #222;
+    padding: 12px 24px;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.35s ease, background-color 0.3s ease;
+    user-select: none;
+    margin-top: 16px;
+  }
+  #logout-btn:hover, #logout-btn:focus {
+    background: #fff176;
+    box-shadow:
+      0 8px 32px rgba(255, 241, 118, 0.9);
+    transform: scale(1.05);
+    outline: none;
+  }
+
+  /* The app styles */
+
+  .app-container {
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 0 20px 40px;
+    display: none;
+  }
+
+  h1.app-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .upload-section {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: saturate(180%) blur(15px);
+    border-radius: 20px;
+    box-shadow:
+      0 4px 30px rgba(0,0,0,0.1),
+      inset 0 0 0 1px rgba(255,255,255,0.3);
+    padding: 28px 30px;
+    margin-bottom: 32px;
+    max-height: 600px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  button.upload-btn {
+    flex: 1;
+    background: #ffd700;
+    border: none;
+    color: #222;
+    padding: 14px 0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.35s ease, background-color 0.3s ease;
+    user-select: none;
+  }
+  button.upload-btn:hover, button.upload-btn:focus {
+    background: #fff176;
+    box-shadow:
+      0 8px 32px rgba(255, 241, 118, 0.9);
+    transform: scale(1.05);
+    outline: none;
+  }
+
+  #fileInfo, #errorMsg {
+    margin: 8px 0 0;
+    font-weight: 600;
+    text-align: center;
+    min-height: 1.4em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    user-select: none;
+  }
+  #fileInfo {
+    color: #ffeb3b;
+  }
+  #errorMsg {
+    color: #f44336;
+    font-weight: 700;
+  }
+
+  #photoPreview, #videoPreview, #pdfPreview {
+    margin-top: 24px;
+    width: 100%;
+    max-height: 320px;
+    border-radius: 16px;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.3);
+    display: none;
+    overflow: hidden;
+    object-fit: contain;
+    background: #000;
+  }
+  #photoPreview, #pdfPreview {
+    border: none;
+    height: auto;
+  }
+  #videoPreview {
+    border: none;
+  }
+
+  #shareSection {
+    margin-top: 24px;
+    width: 100%;
+    text-align: center;
+  }
+
+  #shareLink {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 9px 12px;
+    border-radius: 14px;
+    border: none;
+    font-family: monospace;
+    background: rgba(255 255 255 / 0.15);
+    color: #fff;
+    user-select: all;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+  }
+  #shareLink:focus {
+    outline: none;
+    background: rgba(255 255 255 / 0.3);
+    box-shadow: inset 0 0 12px #ffd700;
+  }
+
+  #copyBtn {
+    margin-top: 12px;
+    background: #ffd700;
+    border: none;
+    color: #222;
+    padding: 12px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.35s ease, background-color 0.3s ease;
+    user-select: none;
+  }
+  #copyBtn:hover, #copyBtn:focus {
+    background: #fff176;
+    box-shadow:
+      0 8px 32px rgba(255, 241, 118, 0.9);
+    transform: scale(1.05);
+    outline: none;
+  }
+
+  /* PDF Editor Section */
+  #pdfEditorSection {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: saturate(180%) blur(15px);
+    border-radius: 20px;
+    box-shadow:
+      0 4px 30px rgba(0,0,0,0.1),
+      inset 0 0 0 1px rgba(255,255,255,0.3);
+    padding: 20px 26px;
+    margin-top: 20px;
+    text-align: left;
+  }
+
+  #pdfEditorSection h2 {
+    margin-top: 0;
+    color: #ffd700;
+    font-weight: 700;
+  }
+
+  #pdfEditorSection label {
+    display: block;
+    margin: 12px 0 6px;
+    font-weight: 600;
+  }
+
+  #pdfEditorSection input[type="text"],
+  #pdfEditorSection input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255 255 255 / 0.2);
+    color: #fff;
+    box-sizing: border-box;
+  }
+
+  #pdfEditorSection button {
+    margin-top: 12px;
+    background: #ffd700;
+    border: none;
+    color: #222;
+    padding: 12px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.35s ease, background-color 0.3s ease;
+    user-select: none;
+  }
+  #pdfEditorSection button:hover, #pdfEditorSection button:focus {
+    background: #fff176;
+    box-shadow:
+      0 8px 32px rgba(255, 241, 118, 0.9);
+    transform: scale(1.05);
+    outline: none;
+  }
+
+  #editorMsg {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    min-height: 1.4em;
+    font-weight: 600;
+    color: #ffeb3b;
+    text-align: center;
+  }
+
+  @media(max-width: 400px) {
+    #login-section, .app-container {
+      width: 95vw;
+      padding: 24px 20px;
+    }
+    #photoPreview, #videoPreview, #pdfPreview {
+      max-height: 240px;
+      margin-top: 18px;
+    }
+    button.upload-btn, #logout-btn, #pdfEditorSection button {
+      font-size: 1rem;
+      padding: 12px 0;
+    }
+    #copyBtn {
+      width: 100%;
+      padding: 14px 0;
+      font-size: 1.05rem;
+    }
+  }
+
+</style>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+
+</head>
+<body>
+  <section id="login-section" aria-label="Login page">
+    <h1>Login to continue</h1>
+    <div id="g_id_onload"
+      data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
+      data-login_uri=""
+      data-auto_prompt="false"
+      data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="filled_blue"
+      data-text="signin_with"
+      data-shape="rectangular"
+      data-logo_alignment="left">
+    </div>
+  </section>
+
+  <section id="app-section" class="app-container" aria-label="Main Uploader App" style="display:none;">
+    <div id="user-info" role="region" aria-live="polite" aria-atomic="true"></div>
+    <button id="logout-btn" aria-label="Logout">Logout</button>
+
+    <h1 class="app-title">PDF &amp; Video Uploader with Sharing &amp; PDF Editor</h1>
+
+    <div class="upload-section" aria-label="File upload and preview section">
+      <div class="btn-group" role="group" aria-label="File upload buttons">
+        <button class="upload-btn" id="uploadPhotoBtn" type="button" aria-describedby="uploadPhotoDesc">Upload Photo</button>
+        <button class="upload-btn" id="uploadVideoBtn" type="button" aria-describedby="uploadVideoDesc">Upload Video</button>
+        <button class="upload-btn" id="uploadPdfBtn" type="button" aria-describedby="uploadPdfDesc">Upload PDF</button>
+      </div>
+      <input type="file" id="photoInput" accept="image/jpeg,image/png,image/gif" hidden aria-describedby="uploadPhotoDesc" />
+      <input type="file" id="videoInput" accept="video/mp4,video/webm,video/ogg" hidden aria-describedby="uploadVideoDesc" />
+      <input type="file" id="pdfInput" accept="application/pdf" hidden aria-describedby="uploadPdfDesc" />
+      <div id="fileInfo" aria-live="polite" aria-atomic="true"></div>
+      <div id="errorMsg" aria-live="assertive" aria-atomic="true"></div>
+
+      <img id="photoPreview" alt="Photo preview" />
+      <video id="videoPreview" controls playsinline></video>
+      <iframe id="pdfPreview" title="PDF Preview"></iframe>
+
+      <div id="shareSection" style="display:none;">
+        <input type="text" id="shareLink" readonly aria-label="Shareable link to uploader with embedded file" />
+        <button id="copyBtn" aria-label="Copy shareable link to clipboard">Copy Link</button>
+      </div>
+    </div>
+
+    <!-- PDF Editor Section -->
+    <div id="pdfEditorSection" aria-label="PDF Editor controls" style="display:none;">
+      <h2>PDF Editor - Add Text Annotation</h2>
+      <label for="annotationText">Annotation Text:</label>
+      <input type="text" id="annotationText" maxlength="100" placeholder="Enter text to add" />
+      <label for="pageNumber">Page Number (1-based):</label>
+      <input type="number" id="pageNumber" min="1" value="1" />
+      <button id="applyAnnotationBtn">Apply Annotation</button>
+      <button id="resetPdfBtn" style="margin-left:10px; background:#444; color:#ffd700;">Reset PDF</button>
+      <div id="editorMsg" aria-live="polite" aria-atomic="true"></div>
+    </div>
+  </section>
+
+<script>
+  // Globals for managing state
+  let userProfile = null;
+
+  let originalPdfBytes = null; // original uploaded PDF bytes
+  let editedPdfBytes = null;   // modified PDF after edits
+
+  function handleCredentialResponse(response) {
+    // Decode JWT token payload to get user info
+    const data = parseJwt(response.credential);
+    userProfile = data;
+    showApp();
+  }
+
+  function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  }
+
+  function showApp() {
+    document.getElementById('login-section').style.display = 'none';
+    const appSection = document.getElementById('app-section');
+    appSection.style.display = 'block';
+
+    // Show user info
+    const userInfoDiv = document.getElementById('user-info');
+    if (userProfile) {
+      userInfoDiv.innerHTML = `
+        <img src="${userProfile.picture}" alt="User profile picture" width="36" height="36" />
+        <span>${userProfile.name}</span>
+      `;
+    }
+  }
+
+  function logout() {
+    userProfile = null;
+    document.getElementById('app-section').style.display = 'none';
+    document.getElementById('login-section').style.display = 'flex';
+    // Remove stored credentials if any (this example only client)
+    google.accounts.id.disableAutoSelect();
+  }
+
+  window.onload = function() {
+    // Initialize Google sign-in
+    google.accounts.id.initialize({
+      client_id: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+      callback: handleCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    });
+
+    google.accounts.id.renderButton(
+      document.querySelector('#login-section .g_id_signin'),
+      { theme: 'filled_blue', size: 'large' }
+    );
+
+    google.accounts.id.prompt();
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // Elements
+    const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+    const uploadVideoBtn = document.getElementById('uploadVideoBtn');
+    const uploadPdfBtn = document.getElementById('uploadPdfBtn');
+
+    const photoInput = document.getElementById('photoInput');
+    const videoInput = document.getElementById('videoInput');
+    const pdfInput = document.getElementById('pdfInput');
+
+    const fileInfo = document.getElementById('fileInfo');
+    const errorMsg = document.getElementById('errorMsg');
+    const photoPreview = document.getElementById('photoPreview');
+    const videoPreview = document.getElementById('videoPreview');
+    const pdfPreview = document.getElementById('pdfPreview');
+
+    const shareSection = document.getElementById('shareSection');
+    const shareLink = document.getElementById('shareLink');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // PDF editor controls
+    const pdfEditorSection = document.getElementById('pdfEditorSection');
+    const annotationTextInput = document.getElementById('annotationText');
+    const pageNumberInput = document.getElementById('pageNumber');
+    const applyAnnotationBtn = document.getElementById('applyAnnotationBtn');
+    const resetPdfBtn = document.getElementById('resetPdfBtn');
+    const editorMsg = document.getElementById('editorMsg');
+
+    const MAX_SHARE_SIZE = 5 * 1024 * 1024;
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+    function resetPreview() {
+      photoPreview.style.display = 'none';
+      photoPreview.src = '';
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+      pdfPreview.style.display = 'none';
+      pdfPreview.src = '';
+      fileInfo.textContent = '';
+      errorMsg.textContent = '';
+      shareSection.style.display = 'none';
+      shareLink.value = '';
+      editorMsg.textContent = '';
+      pdfEditorSection.style.display = 'none';
+      originalPdfBytes = null;
+      editedPdfBytes = null;
+      if (history.replaceState) {
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+      photoInput.disabled = false;
+      videoInput.disabled = false;
+      pdfInput.disabled = false;
+    }
+
+    function formatFileSize(bytes) {
+      const thresh = 1024;
+      if (Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+      }
+      const units = ['KB', 'MB', 'GB', 'TB'];
+      let u = -1;
+      do {
+        bytes /= thresh;
+        ++u;
+      } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+      return bytes.toFixed(1) + ' ' + units[u];
+    }
+
+    function handleFile(file, type) {
+      resetPreview();
+      if (!file) return;
+
+      if (file.size > MAX_FILE_SIZE) {
+        errorMsg.textContent = 'Error: File size exceeds 20MB limit.';
+        return;
+      }
+
+      fileInfo.textContent = `File: ${file.name} (${formatFileSize(file.size)})`;
+
+      if (type === 'photo') {
+        videoPreview.style.display = 'none';
+        videoPreview.src = '';
+        pdfPreview.style.display = 'none';
+        pdfPreview.src = '';
+        photoPreview.src = URL.createObjectURL(file);
+        photoPreview.style.display = 'block';
+        pdfEditorSection.style.display = 'none';
+        originalPdfBytes = null;
+        editedPdfBytes = null;
+      } else if (type === 'video') {
+        photoPreview.style.display = 'none';
+        photoPreview.src = '';
+        pdfPreview.style.display = 'none';
+        pdfPreview.src = '';
+        videoPreview.src = URL.createObjectURL(file);
+        videoPreview.style.display = 'block';
+        pdfEditorSection.style.display = 'none';
+        originalPdfBytes = null;
+        editedPdfBytes = null;
+      } else if (type === 'pdf') {
+        photoPreview.style.display = 'none';
+        photoPreview.src = '';
+        videoPreview.style.display = 'none';
+        videoPreview.src = '';
+        // read PDF bytes for editing
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          originalPdfBytes = new Uint8Array(e.target.result);
+          editedPdfBytes = originalPdfBytes.slice(); // Initially same as original
+          showPdfBytes(editedPdfBytes);
+          pdfEditorSection.style.display = 'block';
+          editorMsg.textContent = '';
+          // Reset annotation inputs
+          annotationTextInput.value = '';
+          pageNumberInput.value = 1;
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      // Prepare sharing for all files
+      if (file.size <= MAX_SHARE_SIZE) {
+        const reader2 = new FileReader();
+        reader2.onload = function(e) {
+          try {
+            const base64Data = e.target.result.split(',')[1];
+            const shareURL = location.origin + location.pathname + `#${type}=${encodeURIComponent(base64Data)}`;
+            shareLink.value = shareURL;
+            shareSection.style.display = 'block';
+          } catch (err) {
+            shareSection.style.display = 'none';
+          }
+        };
+        reader2.readAsDataURL(file);
+      } else {
+        shareSection.style.display = 'none';
+      }
+    }
+
+    async function showPdfBytes(pdfBytes) {
+      const blob = new Blob([pdfBytes], {type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      pdfPreview.src = url;
+      pdfPreview.style.display = 'block';
+      photoPreview.style.display = 'none';
+      photoPreview.src = '';
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+    }
+
+    async function applyAnnotation() {
+      if (!editedPdfBytes) {
+        editorMsg.textContent = 'No PDF loaded to edit.';
+        return;
+      }
+      const text = annotationTextInput.value.trim();
+      if (!text) {
+        editorMsg.textContent = 'Please enter annotation text.';
+        return;
+      }
+      let pageNum = parseInt(pageNumberInput.value);
+      if (isNaN(pageNum) || pageNum < 1) {
+        editorMsg.textContent = 'Invalid page number.';
+        return;
+      }
+      try {
+        const pdfDoc = await PDFLib.PDFDocument.load(editedPdfBytes);
+        if (pageNum > pdfDoc.getPageCount()) {
+          editorMsg.textContent = `Page number exceeds total pages (${pdfDoc.getPageCount()}).`;
+          return;
+        }
+        const pages = pdfDoc.getPages();
+        const page = pages[pageNum - 1];
+        const {width, height} = page.getSize();
+        // Draw text near bottom-left corner with margin
+        page.drawText(text, {
+          x: 40,
+          y: 40,
+          size: 14,
+          color: PDFLib.rgb(1, 0.9, 0), // yellowish
+          opacity: 0.7,
+          font: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold),
+        });
+        const newPdfBytes = await pdfDoc.save();
+        editedPdfBytes = newPdfBytes;
+        await showPdfBytes(newPdfBytes);
+        editorMsg.textContent = 'Annotation applied successfully.';
+        // Update share link with edited PDF
+        if (newPdfBytes.byteLength <= MAX_SHARE_SIZE) {
+          const base64String = arrayBufferToBase64(newPdfBytes);
+          const shareURL = location.origin + location.pathname + `#pdf=${encodeURIComponent(base64String)}`;
+          shareLink.value = shareURL;
+          shareSection.style.display = 'block';
+        } else {
+          shareSection.style.display = 'none';
+          editorMsg.textContent += ' (File too large for sharing link)';
+        }
+      } catch (e) {
+        editorMsg.textContent = 'Error applying annotation.';
+        console.error(e);
+      }
+    }
+
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const len = bytes.byteLength;
+      for(let i=0; i<len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    async function resetPdf() {
+      if (!originalPdfBytes) {
+        editorMsg.textContent = 'No original PDF to reset.';
+        return;
+      }
+      editedPdfBytes = originalPdfBytes.slice();
+      await showPdfBytes(editedPdfBytes);
+      annotationTextInput.value = '';
+      pageNumberInput.value = 1;
+      editorMsg.textContent = 'PDF reset to original.';
+      // Update share link
+      if (editedPdfBytes.byteLength <= MAX_SHARE_SIZE) {
+        const base64String = arrayBufferToBase64(editedPdfBytes);
+        const shareURL = location.origin + location.pathname + `#pdf=${encodeURIComponent(base64String)}`;
+        shareLink.value = shareURL;
+        shareSection.style.display = 'block';
+      } else {
+        shareSection.style.display = 'none';
+      }
+    }
+
+    uploadPhotoBtn.addEventListener('click', () => photoInput.click());
+    uploadVideoBtn.addEventListener('click', () => videoInput.click());
+    uploadPdfBtn.addEventListener('click', () => pdfInput.click());
+
+    photoInput.addEventListener('change', e => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], 'photo');
+      }
+    });
+    videoInput.addEventListener('change', e => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], 'video');
+      }
+    });
+    pdfInput.addEventListener('change', e => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0], 'pdf');
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      if (!shareLink.value) return;
+      shareLink.select();
+      shareLink.setSelectionRange(0, 99999);
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => copyBtn.textContent = 'Copy Link', 1500);
+        } else {
+          alert('Copy failed, please copy manually.');
+        }
+      } catch {
+        alert('Copy not supported, please copy manually.');
+      }
+    });
+
+    applyAnnotationBtn.addEventListener('click', applyAnnotation);
+    resetPdfBtn.addEventListener('click', resetPdf);
+
+  };
+</script>
+</body>
+</html>
+
+
